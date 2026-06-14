@@ -3,117 +3,274 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>World Cup Rankings</title>
+  <title>World Cup Predictions Ranking</title>
   <style>
     :root {
-      --bg: #f7f9fc;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --line: #e5e7eb;
-      --accent: #0f766e;
-      --accent-2: #115e59;
+      --bg: #f3f8ff;
+      --bg-2: #dff1ff;
+      --surface: rgba(255, 255, 255, 0.9);
+      --surface-2: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: rgba(15, 23, 42, 0.12);
+      --brand: #006847;
+      --brand-2: #003e2d;
+      --gold: #d4af37;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
     }
+
+    :root[data-theme="dark"] {
+      --bg: #06131a;
+      --bg-2: #0b2230;
+      --surface: rgba(10, 22, 31, 0.85);
+      --surface-2: #0f2534;
+      --text: #e5eef6;
+      --muted: #9fb2c4;
+      --line: rgba(148, 163, 184, 0.22);
+      --brand: #19a974;
+      --brand-2: #0d6b4b;
+      --gold: #f2cc60;
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #06131a;
+        --bg-2: #0b2230;
+        --surface: rgba(10, 22, 31, 0.85);
+        --surface-2: #0f2534;
+        --text: #e5eef6;
+        --muted: #9fb2c4;
+        --line: rgba(148, 163, 184, 0.22);
+        --brand: #19a974;
+        --brand-2: #0d6b4b;
+        --gold: #f2cc60;
+        --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 35%);
       color: var(--text);
+      font-family: "Trebuchet MS", "Segoe UI", Tahoma, Arial, sans-serif;
+      background:
+        radial-gradient(1000px 420px at 50% -120px, rgba(212, 175, 55, 0.28), transparent 60%),
+        radial-gradient(600px 320px at 110% 10%, rgba(0, 104, 71, 0.22), transparent 70%),
+        radial-gradient(600px 320px at -10% 20%, rgba(0, 92, 172, 0.18), transparent 70%),
+        linear-gradient(180deg, var(--bg-2), var(--bg));
+      min-height: 100vh;
     }
-    .wrap {
-      max-width: 980px;
-      margin: 32px auto;
-      padding: 0 16px;
+
+    .page {
+      max-width: 1080px;
+      margin: 28px auto;
+      padding: 0 16px 28px;
+      animation: enter 500ms ease;
     }
+
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .card {
-      background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+      border-radius: 16px;
+      background: var(--surface);
+      backdrop-filter: blur(4px);
+      box-shadow: var(--shadow);
       overflow: hidden;
     }
-    .head {
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--line);
+
+    .topbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    h1 {
-      font-size: 1.2rem;
-      margin: 0;
-    }
-    button {
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    button:hover { background: var(--accent-2); }
-    .status {
-      padding: 12px 20px;
-      color: var(--muted);
+      justify-content: space-between;
+      gap: 10px;
+      padding: 16px 18px;
       border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(120deg, rgba(0, 104, 71, 0.16), rgba(0, 92, 172, 0.16)),
+        var(--surface-2);
+    }
+
+    .title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
       font-size: 0.9rem;
     }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #ffffff;
+      background: linear-gradient(180deg, var(--brand), var(--brand-2));
+      box-shadow: 0 6px 14px rgba(0, 104, 71, 0.25);
+      transition: transform 140ms ease, filter 140ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+
+    .btn.secondary {
+      color: var(--text);
+      background: transparent;
+      border-color: var(--line);
+      box-shadow: none;
+    }
+
+    .status {
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+      background: var(--surface-2);
+    }
+
+    .table-wrap {
+      padding: 12px;
+      overflow: auto;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 520px;
+      border-radius: 12px;
+      overflow: hidden;
     }
-    th, td {
-      border-bottom: 1px solid var(--line);
-      padding: 10px 12px;
+
+    thead th {
       text-align: left;
-      font-size: 0.95rem;
-      vertical-align: middle;
-    }
-    th {
-      background: #f8fafc;
-      font-weight: 700;
+      padding: 11px 12px;
+      font-size: 0.88rem;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--text);
+      background:
+        linear-gradient(90deg, rgba(212, 175, 55, 0.2), rgba(0, 104, 71, 0.12)),
+        var(--surface-2);
+      border-bottom: 1px solid var(--line);
       position: sticky;
       top: 0;
-      z-index: 1;
+      z-index: 2;
     }
-    tbody tr:hover { background: #f9fafb; }
+
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+    }
+
+    tbody tr:nth-child(even) td {
+      background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+    }
+
+    tbody tr:hover td {
+      background: color-mix(in srgb, var(--gold) 14%, var(--surface-2));
+    }
+
+    .rank {
+      width: 84px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
     .num {
       text-align: right;
-      width: 90px;
+      width: 120px;
       font-variant-numeric: tabular-nums;
+      font-weight: 700;
     }
-    .pad { padding: 14px 20px; }
-    @media (max-width: 640px) {
-      th, td { padding: 8px; font-size: 0.9rem; }
-      .head { padding: 14px; }
+
+    .name {
+      font-weight: 600;
+    }
+
+    @media (max-width: 740px) {
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .controls {
+        width: 100%;
+      }
+      .btn {
+        flex: 1;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="head">
-        <h1>World Cup Predictions Ranking</h1>
-        <button id="refreshBtn">Refresh</button>
+  <main class="page">
+    <section class="card">
+      <div class="topbar">
+        <div class="title-wrap">
+          <h1>World Cup Predictions Ranking</h1>
+          <p class="subtitle">Live standings powered by Google Sheets</p>
+        </div>
+        <div class="controls">
+          <button class="btn secondary" id="themeToggle" type="button">Toggle theme</button>
+          <button class="btn" id="refreshBtn" type="button">Refresh</button>
+        </div>
       </div>
+
       <div class="status" id="status">Loading rankings...</div>
-      <div class="pad" id="tableContainer"></div>
-    </div>
-  </div>
+      <div class="table-wrap" id="tableContainer"></div>
+    </section>
+  </main>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzox1Rpv3-UrNnJLov_JOOToCF_h0XSgVp6SoQyZtFgXJRWye_EH1gtjLATvkq1tAQz/exec";
 
+    function applySavedTheme() {
+      var saved = localStorage.getItem("ranking_theme");
+      if (saved === "light" || saved === "dark") {
+        document.documentElement.setAttribute("data-theme", saved);
+      }
+    }
+
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute("data-theme");
+      var next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("ranking_theme", next);
+    }
+
     function loadRankings() {
-      const status = document.getElementById("status");
-      const tableContainer = document.getElementById("tableContainer");
+      var status = document.getElementById("status");
+      var tableContainer = document.getElementById("tableContainer");
       status.textContent = "Loading rankings...";
       tableContainer.innerHTML = "";
 
-      const cbName = "rankingsCb_" + Date.now();
+      var cbName = "rankingsCb_" + Date.now();
 
       window[cbName] = function (data) {
         try {
@@ -122,7 +279,7 @@
             return;
           }
 
-          const headers = Object.keys(data[0]);
+          var headers = Object.keys(data[0]);
           tableContainer.innerHTML = buildTable(headers, data);
           status.textContent = "Last updated: " + new Date().toLocaleString() + " (live from Google Sheets)";
         } finally {
@@ -130,13 +287,13 @@
         }
       };
 
-      const script = document.createElement("script");
+      var script = document.createElement("script");
       script.src = API_URL + "?callback=" + cbName + "&_=" + Date.now();
       script.onerror = function () {
         status.textContent = "Could not load rankings.";
         tableContainer.innerHTML =
           "<p style='color:#b91c1c;margin:0;'>Error: Failed to load endpoint.</p>" +
-          "<p style='color:#6b7280;'>Tip: Make sure Apps Script deployment is Anyone and /exec.</p>";
+          "<p style='color:var(--muted);margin-top:8px;'>Check Apps Script deployment access and URL.</p>";
         delete window[cbName];
       };
 
@@ -144,16 +301,26 @@
     }
 
     function buildTable(headers, rows) {
-      let out = "<table><thead><tr>";
-      for (const h of headers) out += "<th>" + escapeHtml(h || "Rank") + "</th>";
+      var out = "<table><thead><tr>";
+      for (var i = 0; i < headers.length; i++) {
+        var h = headers[i] || "Rank";
+        out += "<th>" + escapeHtml(h) + "</th>";
+      }
       out += "</tr></thead><tbody>";
 
-      for (const row of rows) {
+      for (var r = 0; r < rows.length; r++) {
+        var row = rows[r];
         out += "<tr>";
-        for (const h of headers) {
-          const val = row[h] ?? "";
-          const isNumber = typeof val === "number" || (!isNaN(val) && val !== "");
-          const cls = isNumber ? "num" : "";
+        for (var c = 0; c < headers.length; c++) {
+          var key = headers[c];
+          var val = row[key] == null ? "" : row[key];
+          var headerName = (key || "").toLowerCase();
+          var cls = "";
+
+          if (headerName === "" || headerName === "rank") cls = "rank";
+          else if (!isNaN(val) && val !== "") cls = "num";
+          if (headerName === "name") cls = "name";
+
           out += "<td class='" + cls + "'>" + escapeHtml(String(val)) + "</td>";
         }
         out += "</tr>";
@@ -168,10 +335,12 @@
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
+        .replaceAll("\"", "&quot;")
         .replaceAll("'", "&#39;");
     }
 
+    applySavedTheme();
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
     document.getElementById("refreshBtn").addEventListener("click", loadRankings);
     loadRankings();
   </script>
