@@ -45,10 +45,6 @@
       font-size: 1.2rem;
       margin: 0;
     }
-    .meta {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
     button {
       background: var(--accent);
       color: white;
@@ -89,7 +85,6 @@
       width: 90px;
       font-variant-numeric: tabular-nums;
     }
-    .center { text-align: center; }
     .pad { padding: 14px 20px; }
     @media (max-width: 640px) {
       th, td { padding: 8px; font-size: 0.9rem; }
@@ -112,39 +107,45 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzox1Rpv3-UrNnJLov_JOOToCF_h0XSgVp6SoQyZtFgXJRWye_EH1gtjLATvkq1tAQz/exec";
 
-    async function loadRankings() {
+    function loadRankings() {
       const status = document.getElementById("status");
       const tableContainer = document.getElementById("tableContainer");
       status.textContent = "Loading rankings...";
       tableContainer.innerHTML = "";
 
-      try {
-        const response = await fetch(API_URL, { cache: "no-store" });
-        if (!response.ok) throw new Error("HTTP " + response.status);
+      const cbName = "rankingsCb_" + Date.now();
 
-        const data = await response.json();
-        if (!Array.isArray(data) || data.length === 0) {
-          status.textContent = "No ranking data found.";
-          return;
+      window[cbName] = function (data) {
+        try {
+          if (!Array.isArray(data) || data.length === 0) {
+            status.textContent = "No ranking data found.";
+            return;
+          }
+
+          const headers = Object.keys(data[0]);
+          tableContainer.innerHTML = buildTable(headers, data);
+          status.textContent = "Last updated: " + new Date().toLocaleString() + " (live from Google Sheets)";
+        } finally {
+          delete window[cbName];
         }
+      };
 
-        const headers = Object.keys(data[0]);
-        const html = buildTable(headers, data);
-        tableContainer.innerHTML = html;
-
-        const now = new Date().toLocaleString();
-        status.textContent = "Last updated: " + now + " (data is live from Google Sheets)";
-      } catch (err) {
+      const script = document.createElement("script");
+      script.src = API_URL + "?callback=" + cbName + "&_=" + Date.now();
+      script.onerror = function () {
         status.textContent = "Could not load rankings.";
         tableContainer.innerHTML =
-          "<p style='color:#b91c1c;margin:0;'>Error: " + escapeHtml(String(err)) + "</p>" +
-          "<p style='color:#6b7280;'>Tip: confirm your Apps Script deployment is set to Anyone and uses /exec URL.</p>";
-      }
+          "<p style='color:#b91c1c;margin:0;'>Error: Failed to load endpoint.</p>" +
+          "<p style='color:#6b7280;'>Tip: Make sure Apps Script deployment is Anyone and /exec.</p>";
+        delete window[cbName];
+      };
+
+      document.body.appendChild(script);
     }
 
     function buildTable(headers, rows) {
       let out = "<table><thead><tr>";
-      for (const h of headers) out += "<th>" + escapeHtml(h) + "</th>";
+      for (const h of headers) out += "<th>" + escapeHtml(h || "Rank") + "</th>";
       out += "</tr></thead><tbody>";
 
       for (const row of rows) {
