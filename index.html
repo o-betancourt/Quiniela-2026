@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>World Cup Rankings</title>
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #0f766e;
+      --accent-2: #115e59;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 35%);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+    .head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    h1 {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { background: var(--accent-2); }
+    .status {
+      padding: 12px 20px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      font-size: 0.9rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 0.95rem;
+      vertical-align: middle;
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tbody tr:hover { background: #f9fafb; }
+    .num {
+      text-align: right;
+      width: 90px;
+      font-variant-numeric: tabular-nums;
+    }
+    .center { text-align: center; }
+    .pad { padding: 14px 20px; }
+    @media (max-width: 640px) {
+      th, td { padding: 8px; font-size: 0.9rem; }
+      .head { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="head">
+        <h1>World Cup Predictions Ranking</h1>
+        <button id="refreshBtn">Refresh</button>
+      </div>
+      <div class="status" id="status">Loading rankings...</div>
+      <div class="pad" id="tableContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzox1Rpv3-UrNnJLov_JOOToCF_h0XSgVp6SoQyZtFgXJRWye_EH1gtjLATvkq1tAQz/exec";
+
+    async function loadRankings() {
+      const status = document.getElementById("status");
+      const tableContainer = document.getElementById("tableContainer");
+      status.textContent = "Loading rankings...";
+      tableContainer.innerHTML = "";
+
+      try {
+        const response = await fetch(API_URL, { cache: "no-store" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+
+        const data = await response.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          status.textContent = "No ranking data found.";
+          return;
+        }
+
+        const headers = Object.keys(data[0]);
+        const html = buildTable(headers, data);
+        tableContainer.innerHTML = html;
+
+        const now = new Date().toLocaleString();
+        status.textContent = "Last updated: " + now + " (data is live from Google Sheets)";
+      } catch (err) {
+        status.textContent = "Could not load rankings.";
+        tableContainer.innerHTML =
+          "<p style='color:#b91c1c;margin:0;'>Error: " + escapeHtml(String(err)) + "</p>" +
+          "<p style='color:#6b7280;'>Tip: confirm your Apps Script deployment is set to Anyone and uses /exec URL.</p>";
+      }
+    }
+
+    function buildTable(headers, rows) {
+      let out = "<table><thead><tr>";
+      for (const h of headers) out += "<th>" + escapeHtml(h) + "</th>";
+      out += "</tr></thead><tbody>";
+
+      for (const row of rows) {
+        out += "<tr>";
+        for (const h of headers) {
+          const val = row[h] ?? "";
+          const isNumber = typeof val === "number" || (!isNaN(val) && val !== "");
+          const cls = isNumber ? "num" : "";
+          out += "<td class='" + cls + "'>" + escapeHtml(String(val)) + "</td>";
+        }
+        out += "</tr>";
+      }
+
+      out += "</tbody></table>";
+      return out;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadRankings);
+    loadRankings();
+  </script>
+</body>
+</html>
