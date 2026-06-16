@@ -161,7 +161,6 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 520px;
       border-radius: 12px;
       overflow: hidden;
     }
@@ -212,6 +211,10 @@
 
     .name {
       font-weight: 600;
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     @media (max-width: 740px) {
